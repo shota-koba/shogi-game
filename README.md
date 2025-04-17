@@ -12,13 +12,13 @@
 python -m venv venv 
 venv\Scripts\activate
 
-必要なライブラリのインストール
+#必要なライブラリのインストール
 pip install -r requirements.txt
 
-アプリの起動
+#アプリの起動
 Python backend.py
 
-注意
+##注意
 ・venvフォルダはGit環境に含まれていません。
 自分の環境で作成してください。
  
