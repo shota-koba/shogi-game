@@ -19,8 +19,8 @@ pip install -r requirements.txt
 Python backend.py
 
 ##注意
-・venvフォルダはGit環境に含まれていません。
-自分の環境で作成してください。
+・venvフォルダはGit環境に含まれておりません。
+ご自身の環境で作成してください。
  
 
  ##特徴
@@ -32,6 +32,9 @@ Python backend.py
  ・ブラウザで'http://localhost:5500'を開く
  ・振り駒を振る
  ・名前の入力
+ ・対局開始
+ ・投了
+ ・リセット
 
  
  ※注意!!
