@@ -2,6 +2,27 @@
 
  これはブラウザで遊べる将棋ゲームです。
 
+#セットアップ手順
+
+このアプリを実行するにはPythonと仮想環境が必要です。
+
+### 1. 仮想環境の作成(Windowsの場合)
+
+'''bash
+python -m venv venv 
+venv\Scripts\activate
+
+必要なライブラリのインストール
+pip install -r requirements.txt
+
+アプリの起動
+Python backend.py
+
+注意
+・venvフォルダはGit環境に含まれていません。
+自分の環境で作成してください。
+ 
+
  ##特徴
  -HTML + CSS + JS でフロントエンド
  -Python (Flask)をバックエンドに使用
