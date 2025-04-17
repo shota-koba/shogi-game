@@ -29,7 +29,7 @@ Python backend.py
 
  ##遊び方
  ・サーバーを起動します
- ・ブラウザで'http://localhost:5000'を開く
+ ・ブラウザで'http://localhost:5500'を開く
  ・振り駒を振る
  ・名前の入力
 
