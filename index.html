@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#4CAF50">
+  <title>将棋ゲーム</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container">
+
+    <!-- コントロールパネル (一番上) -->
+    <div id="control-panel" role="toolbar" aria-label="ゲームコントロール">
+      <button id="rewind-all" title="初期配置に戻す" aria-label="初期配置に戻す">|◀</button>
+      <button id="rewind" title="1手戻す" aria-label="1手戻す">◀</button>
+      <button id="forward" title="1手進める" aria-label="1手進める">▶</button>
+      <button id="forward-all" title="最後まで進める" aria-label="最後まで進める">▶|</button>
+      <button id="resign-button" title="投了" aria-label="投了">投了</button>
+      <button id="end-game-button" title="リセット/終了" aria-label="リセットまたは終了">終了</button>
+    </div>
+
+    <!-- 盤面エリア (相対位置の基準) -->
+    <div id="board-area">
+        <!-- 後手情報 (盤面左上外側) -->
+        <div id="gote-info" class="player-info-area player-info-gote" role="region" aria-label="後手の情報">
+          <div class="player-name-input">
+            <label for="gote-name">後手</label>
+            <input id="gote-name" type="text" placeholder="名前(6文字以内)" aria-label="後手の名前" maxlength="6">
+          </div>
+          <div id="gote-captures" class="captures" role="region" aria-label="後手の持ち駒"></div>
+        </div>
+
+        <!-- 将棋盤 -->
+        <div id="shogi-board" role="grid" aria-label="将棋盤"></div>
+
+        <!-- 先手情報 (盤面右下外側) -->
+        <div id="sente-info" class="player-info-area player-info-sente" role="region" aria-label="先手の情報">
+          <div id="sente-captures" class="captures" role="region" aria-label="先手の持ち駒"></div>
+          <div class="player-name-input">
+            <label for="sente-name">先手</label>
+            <input id="sente-name" type="text" placeholder="名前(6文字以内)" aria-label="先手の名前" maxlength="6">
+          </div>
+        </div>
+    </div>
+
+    <!-- 振り駒コンテナ -->
+    <div id="furigoma-container" role="region" aria-label="振り駒">
+      <button id="furigoma-button" title="振り駒" aria-label="振り駒">振り駒</button>
+      <div id="furigoma-result" role="status" aria-live="polite"></div>
+      <div id="furigoma-animation" role="presentation">
+        <div class="furigoma-animation-piece" aria-hidden="true"></div>
+        <div class="furigoma-animation-piece" aria-hidden="true"></div>
+        <div class="furigoma-animation-piece" aria-hidden="true"></div>
+        <div class="furigoma-animation-piece" aria-hidden="true"></div>
+        <div class="furigoma-animation-piece" aria-hidden="true"></div>
+      </div>
+      <button id="start-button" title="対局開始" aria-label="対局開始">対局開始</button>
+    </div>
+
+    <!-- メッセージエリア -->
+    <div id="message" role="status" aria-live="polite">振り駒を行ってください</div>
+
+    <!-- スクリーンリーダー用ライブリージョン -->
+    <div id="live-region" aria-live="polite" style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;"></div>
+
+  </div>
+  <script src="shogiGame.js"></script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+/* style.css (提示HTML用 - 持ち駒3列固定幅、木目調、スクロールなし) */
+:root {
+  --board-color: #FED;
+  --grid-color: #000;
+  --text-color: #000;
+  --highlight-color: rgba(0, 150, 255, 0.3);
+  --check-highlight-color: rgba(255, 100, 100, 0.4);
+  --cell-size: min(55px, 9vw); /* 左右にスペース確保のため調整 */
+  --piece-size: 90%;
+  --button-size: 40px;
+  --capture-piece-size: 30px;
+  /* ★ 持ち駒エリア3列表示用 ★ */
+  --capture-area-cols: 3;
+  --capture-area-gap: 4px;
+  /* ★ 固定幅を計算 ★ */
+  --capture-area-fixed-width: calc(var(--capture-area-cols) * (var(--capture-piece-size) + var(--capture-area-gap)) + 10px); /* padding考慮 */
+  /* ★ 固定高さを計算 (例: 3行分) ★ */
+  --capture-area-fixed-height: calc(3 * (var(--capture-piece-size) + var(--capture-area-gap)) + 10px);
+  /* ★★★★★★★★★★★★★★ */
+  --info-area-width: var(--capture-area-fixed-width); /* 情報エリア幅 = 持ち駒エリア幅 */
+  --info-area-gap: 10px; /* 盤面との横の間隔 */
+  /* 木目調の色 */
+  --wood-color-light: #E0A96D;
+  --wood-color-dark: #8B5A2B;
+  --wood-grain-color: rgba(0, 0, 0, 0.08);
+}
+
+body {
+  font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; margin: 0; background-color: #f0f0f0;
+  touch-action: manipulation; padding: 10px; box-sizing: border-box;
+}
+
+#game-container {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  width: 100%;
+  /* ★ 最大幅を盤面+左右情報エリアに合わせて再計算 ★ */
+  max-width: calc(9 * var(--cell-size) + 2 * var(--info-area-width) + 2 * var(--info-area-gap) + 4px);
+  margin: 0 auto; box-sizing: border-box;
+}
+
+#control-panel {
+  display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; width: 100%;
+  order: 1; /* 表示順: 1番上 */
+}
+#control-panel button {
+  width: var(--button-size); height: var(--button-size); padding: 0; font-size: 1.2em; cursor: pointer;
+  display: flex; justify-content: center; align-items: center; background-color: #4CAF50; color: white;
+  border: none; border-radius: 4px; transition: background-color 0.3s;
+}
+
+/* ★★★ 盤面エリア (位置指定の基準) ★★★ */
+#board-area {
+  position: relative; /* 絶対配置の基準 */
+  width: calc(9 * var(--cell-size) + 4px);
+  height: calc(9 * var(--cell-size) + 4px);
+  margin: 10px 0;
+  order: 3; /* 表示順 */
+  display: none; /* 初期はJSで非表示 */
+}
+
+/* 将棋盤 */
+#shogi-board {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0; /* 親エリアいっぱいに */
+  display: grid; grid-template-columns: repeat(9, var(--cell-size)); grid-template-rows: repeat(9, var(--cell-size));
+  border: 2px solid var(--grid-color); background-color: var(--board-color); touch-action: manipulation; z-index: 1;
+}
+.cell { border: 1px solid var(--grid-color); display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; touch-action: manipulation; }
+.cell.highlighted { background-color: var(--highlight-color); }
+.cell.check-highlight { background-color: var(--check-highlight-color); }
+
+/* 盤上の駒 */
+.piece { width: var(--piece-size); height: var(--piece-size); display: flex; justify-content: center; align-items: center; background-color: #FDB; border-radius: 4px; border: 1px solid #333; font-weight: bold; user-select: none; position: relative; cursor: pointer; touch-action: manipulation; transition: transform 0.1s, background-color 0.2s, border-color 0.2s; box-sizing: border-box; font-size: 1.1em; }
+.piece:active { transform: scale(0.95); } .piece.gote { transform: rotate(180deg); } .piece.gote:active { transform: rotate(180deg) scale(0.95); } .piece.promoted { background-color: #FCC; color: #c00; } .piece.selected { outline: 2px solid red; outline-offset: -2px; box-shadow: 0 0 8px rgba(255,0,0,0.7); z-index: 10; }
+
+/* ★★★ プレイヤー情報エリア (絶対配置で左右に) ★★★ */
+.player-info-area {
+  position: absolute; /* 盤面エリア基準 */
+  width: var(--info-area-width); /* 計算された固定幅 */
+  /* ★ 高さは自動ではなく、盤面に合わせるか、持ち駒に合わせる ★ */
+  /* height: calc(9 * var(--cell-size) + 4px); */ /* 盤面高 */
+  height: auto; /* または中の要素に合わせる */
+  min-height: calc(var(--capture-area-fixed-height) + 40px); /* 持ち駒+名前分 */
+  display: none; /* 初期非表示 (JSでflexに) */
+  flex-direction: column; gap: 5px; padding: 5px; box-sizing: border-box;
+  background-color: rgba(255, 255, 255, 0.6); border: 1px solid #ccc; border-radius: 5px; z-index: 5;
+  overflow: visible; /* ★ スクロールなし ★ */
+}
+/* 後手情報 (左上) */
+.player-info-gote { top: 0; left: calc(-1 * var(--info-area-width) - var(--info-area-gap)); align-items: flex-start; }
+.player-info-gote .player-name-input { order: 1; }
+.player-info-gote .captures { order: 2; }
+/* 先手情報 (右下) - bottom と right で指定 */
+.player-info-sente { bottom: 0; right: calc(-1 * var(--info-area-width) - var(--info-area-gap)); align-items: flex-end; }
+.player-info-sente .player-name-input { order: 2; } /* 名前を下 */
+.player-info-sente .captures { order: 1; }       /* 持ち駒を上 */
+
+/* 名前入力 */
+.player-name-input { display: flex; align-items: center; gap: 5px; font-size: 0.9em; width: 100%; /* 幅を親に合わせる */ box-sizing: border-box; padding: 0 5px; /* 左右に少しパディング */ }
+.player-name-input label { font-weight: bold; flex-shrink: 0; }
+.player-name-input input[type="text"] { padding: 4px; border: 1px solid #ccc; border-radius: 3px; font-size: 1em; flex-grow: 1; min-width: 50px; }
+/* 右寄せ調整 */
+.player-info-sente .player-name-input { justify-content: flex-end; }
+.player-info-sente input[type="text"] { text-align: right; }
+
+
+/* ★★★ 持ち駒エリアのスタイル (固定3列, 木目調, スクロールなし) ★★★ */
+.captures {
+  display: flex; flex-wrap: wrap; gap: var(--capture-area-gap); padding: 5px; /* 内側の余白 */
+  /* 固定サイズ */
+  width: var(--capture-area-fixed-width);
+  height: var(--capture-area-fixed-height);
+  /* 木目調背景 */
+  background-color: var(--wood-color-light);
+  background-image: linear-gradient(90deg, var(--wood-grain-color) 1px, transparent 1px, transparent 8px, var(--wood-grain-color) 1px, transparent 1px, transparent 4px, var(--wood-grain-color) 1px, transparent 1px, transparent 10px);
+  background-size: 25px 100%; border: 1px solid #6F4E37; border-radius: 5px; box-sizing: border-box;
+  overflow: hidden; /* スクロールバーなし、はみ出し非表示 */
+  margin: 0; /* marginリセット */
+}
+/* 先手の持ち駒エリアは右詰め */
+.player-info-sente .captures { justify-content: flex-end; }
+/* 後手の持ち駒エリアは左詰め (デフォルト) */
+.player-info-gote .captures { justify-content: flex-start; }
+
+/* ★★★ 先手の入力欄の text-align を修正 ★★★ */
+#sente-info input[type="text"] {
+     /* text-align: right; */ /* ← これを削除またはコメントアウト */
+     text-align: left; /* ← または left を明示的に指定 */
+}
+/* ★★★★★★★★★★★★★★★★★★★★★★★★ */
+
+
+
+/* 持ち駒 */
+.captures .piece { font-size: 0.9em; width: var(--capture-piece-size); height: var(--capture-piece-size); min-width: 0; padding: 0; background-color: rgba(254, 237, 187, 0.9); border-radius: 3px; border: 1px solid #543; font-weight: normal; user-select: none; cursor: pointer; touch-action: manipulation; display: flex; justify-content: center; align-items: center; box-sizing: border-box; position: relative; box-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
+.captures .piece .count { font-size: 0.7em; position: absolute; bottom: 1px; right: 2px; color: #333; background: rgba(255,255,255,0.7); padding: 0 2px; border-radius: 2px; }
+.captures .piece.selected { outline: 2px solid blue; outline-offset: -2px; }
+
+
+/* メッセージエリア */
+#message { font-size: 1.1em; padding: 8px 10px; background-color: white; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: calc(9 * var(--cell-size) + 4px); min-height: 1.5em; box-sizing: border-box; order: 4; /* 表示順 */ display: block; margin-top: 10px; }
+#message.board-alert { font-weight: bold; color: red; animation: pulse 0.8s ease-in-out infinite alternate; }
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
+
+/* 振り駒コンテナ */
+#furigoma-container { display: none; flex-direction: column; align-items: center; gap: 15px; background-color: #f0f0f0; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: calc(9 * var(--cell-size) + 4px); box-sizing: border-box; margin-top: 10px; order: 2; }
+#furigoma-animation { display: flex; gap: 10px; margin: 10px 0; justify-content: center; }
+.furigoma-animation-piece { width: var(--button-size); height: var(--button-size); background-color: #FDB; border: 2px solid #000; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1.2em; }
+@keyframes flip { 0% { transform: rotateX(0deg); } 100% { transform: rotateX(720deg); } }
+
+/* 一般ボタン */
+button { padding: 8px 16px; font-size: 1em; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px; transition: background-color 0.3s; touch-action: manipulation; }
+button:hover:not(:disabled) { background-color: #45a049; }
+button:disabled { background-color: #cccccc; cursor: not-allowed; opacity: 0.7; }
+#resign-button { background-color: #dc3545; } #resign-button:hover:not(:disabled) { background-color: #bb2d3b; }
+#end-game-button { background-color: #6c757d; } #end-game-button:hover:not(:disabled) { background-color: #5a6268; }
+
+/* 履歴閲覧中スタイル */
+#shogi-board.history-viewing .cell, #shogi-board.history-viewing .piece { cursor: default !important; }
+#shogi-board.history-viewing .piece.selected { outline: none; box-shadow: none; }
+.captures .piece.selected.history-viewing-capture { outline: none; }
+
+
+/* レスポンシブ調整 */
+@media (max-width: 950px) { /* 左右配置が厳しくなったら上下配置に戻す */
+     :root { --cell-size: min(45px, 8vw); --capture-piece-size: 26px; }
+     #game-container { max-width: 100%; } body { align-items: flex-start; padding-top: 10px;}
+     /* ★ main-area を削除したので、関連スタイルも削除 ★ */
+     /* #main-area { ... } */
+     /* ★ #player-info を表示し、縦積みにする ★ */
+     #player-info {
+         order: 2; display: flex; flex-direction: column; align-items: center;
+         max-width: calc(9 * var(--cell-size) + 4px); gap: 10px; margin-bottom: 10px;
+     }
+     /* ★ #gote-info, #sente-info の absolute 配置を解除 ★ */
+     .player-info-area {
+         position: static; /* static に戻す */
+         width: 90%; max-width: 400px; height: auto; max-height: none;
+         align-items: center; /* 中央揃え */
+         order: 0; /* order リセット */
+         background-color: transparent; border: none; /* 背景・枠線なし */
+         overflow: visible; /* スクロールなし */
+     }
+     #gote-info { order: 1; } /* 盤面の上 */
+     #sente-info { order: 3; } /* メッセージの下 */
+     #sente-info { margin-left: 0; align-items: center; } /* 右寄せ解除 */
+     #gote-info .captures, #sente-info .captures {
+         justify-content: center; /* 持ち駒を中央揃え */
+         width: 100%; /* 幅いっぱいにするか、固定幅にするか */
+         max-width: calc(var(--capture-area-cols) * (var(--capture-piece-size) + var(--capture-area-gap)) + 10px); /* 3列幅目安 */
+         height: auto; /* 高さは成り行き */
+         min-height: calc(var(--capture-piece-size) + 10px);
+         margin-left: auto; margin-right: auto;
+         /* 木目背景・枠線も適用 */
+         background-image: linear-gradient(90deg, var(--wood-grain-color) 1px, transparent 1px, transparent 8px, var(--wood-grain-color) 1px, transparent 1px, transparent 4px, var(--wood-grain-color) 1px, transparent 1px, transparent 10px);
+         background-size: 25px 100%; background-color: var(--wood-color-light);
+         border: 1px solid #6F4E37; border-radius: 3px;
+     }
+     #gote-info .player-name-input { order: 1; align-self: center; }
+     #gote-info .captures { order: 2; }
+     #sente-info .player-name-input { order: 1; align-self: center; } /* 先手も名前を上に */
+     #sente-info .captures { order: 2; }
+     .player-name-input input[type="text"] { width: 150px; }
+     #shogi-board { order: 2; margin: 5px auto; position: static; } /* 盤面の位置調整 */
+     #message { order: 3; margin-top: 0; max-width: calc(9 * var(--cell-size) + 4px); }
+     #control-panel { order: 0; margin-bottom: 5px;}
+     #furigoma-container { order: 1; margin-top: 5px; } /* 振り駒の位置調整 */
+}
+@media (max-width: 480px) {
+     :root { --cell-size: min(36px, 8.5vw); --capture-piece-size: 22px; --button-size: 28px;}
+     body { font-size: 14px; }
+     #player-info input[type="text"] { width: 120px; }
+     /* 持ち駒エリアサイズ再計算 */
+     :root { --capture-piece-size: 22px; } /* 再定義 */
+     .captures { width: calc(var(--capture-area-cols) * (var(--capture-piece-size) + var(--capture-area-gap)) + 10px); height: calc(3 * (var(--capture-piece-size) + var(--capture-area-gap)) + 10px); }
+     .captures .piece { font-size: 0.75em; } .captures .piece .count { font-size: 0.65em; }
+     #control-panel button { height: var(--button-size); font-size: 0.8em; padding: 0 6px; width: auto; }
+     #message { font-size: 0.85em; padding: 4px 6px; max-width: none; width: 100%; }
+}
